@@ -1,0 +1,270 @@
+apiVersion: connectors.aiops.ibm.com/v1beta1
+kind: ConnectorSchema
+metadata:
+  name: java-grpc-connector-template
+spec:
+  categories:
+  - events
+  ceType: com.ibm.aiops.connectors.configuration
+  components:
+  - apiType: AsyncAPI
+    name: connector
+  - apiType: AsyncAPI
+    name: observer-orchestrator
+    controllerConfig:
+      - name: servicename
+        value: generic-topology-processor
+      - name: serviceport
+        value: '9166'
+      - name: servicepath
+        value: '/1.0/cp4waiops-cartridge.generic-observer/jobs'
+      - name: jobpostpath
+        value: '/listen'
+      - name: mapping
+        value: '{ "parameters":{ "provider":"unique-provider"}, "schedule": {}}'
+      - name: neverupdate
+        value: "true"
+  documentation: https://github.ibm.com/quicksilver/cp4waiops-grpc-templates/blob/master/open-liberty/README.md
+  permissions:
+    channels:
+      - name: cp4waiops-cartridge.analyticsorchestrator.metrics.itsm.raw
+        operations:
+          - write
+      - name: cp4waiops-cartridge.connector-generic.svc_topology.connector_report
+        operations:
+          - write
+      - name: cp4waiops-cartridge.lifecycle.input.events
+        operations:
+          - write
+  schema:
+    additionalProperties: false
+    oneOf:
+    - required:
+      - cpuThreshold
+      - severityLevel
+      - expirySeconds
+      - enableCPUHeavyWorkload
+      - enableGatherMetrics
+    properties:
+      cpuThreshold:
+        type: integer
+        description: Target CPU for Threshold
+        default: 80
+      severityLevel:
+        type: integer
+        description: Severity level of events to emit (1-6)
+        default: 6
+      expirySeconds:
+        type: integer
+        description: Amount of time in seconds before the event is dismissed
+        default: 300
+      enableCPUHeavyWorkload:
+        type: boolean
+        description: Starts or stops a cpu intensive task
+        default: false
+      enableGatherMetrics:
+        type: boolean
+        description: Enables or disables metric connector template
+        default: true
+      metricName:
+        type: string
+        description: Name of metric to generate
+        default: Usage%
+      isLiveData:
+        type: boolean
+        description: True enables live data or false enables historical
+      deploymentType:
+        type: string
+        description: Dictates if deployment is local or remote
+        default: local
+      display_name:
+        description: Display name of the connection
+        type: string
+      historicStartDate:
+        description: Date to start dumping generated sample data
+        type: string
+      historicEndDate:
+        description: Date to end dumping generated sample data
+        type: string
+      numCPUWorkloadThreads:
+        type: integer
+        description: Number of threads to use for cpu intensive task
+        default: 1
+      enableTopologySampleGeneration:
+        type: boolean
+        description: Enable generation of sample topology data
+        default: false        
+    type: object
+  uiSchema:
+    type: java-grpc-connector-template
+    displayName: "Java gRPC Connector Template"
+    categories:
+    - "{{connector.common.category.events}}"
+    url: https://ibm.biz/int-github
+    isObserver: false
+    apiAdaptor: connection
+    datasourceType: events
+    sidePanelTitle: "Java gRPC Connector Template"
+    sidePanelDescription: "A sample template that submits events to the Connector Lifecycle Event Manager"
+    sidePanelInfoHeader: "Information"
+    sidePanelInfo:
+    - "TODO"
+    hasOptionalConfig: false
+    hasOptionalText: false
+    hasAIModelType: false
+    formSteps:
+    - step:
+        id: addConnection
+        name: "{{formSteps.addConnection}}"
+    form:
+    - id: name
+      element: input
+      type: text
+      label: "{{connector.common.form.uniqueID.label}}"
+      placeholder: "{{connector.common.form.ops_integration_name.placeholder}}"
+      apiMapping: connection_config.display_name
+      formStep: addConnection
+      isRequired: true
+    - id: cpuThreshold
+      element: input
+      type: number
+      label: "CPU Usage Threshold"
+      placeholder: "80"
+      min: 1
+      max: 2147483647
+      step: 1
+      defaultValue: 80
+      helperText: "Specify the cpu usage threshold. The default is 80"
+      apiMapping: connection_config.cpuThreshold
+      formStep: addConnection
+      isRequired: true
+    - id: severityLevel
+      element: input
+      type: number
+      label: "Event Severity Level"
+      placeholder: "6"
+      min: 1
+      max: 6
+      step: 1
+      defaultValue: 6
+      helperText: "Specify the event severity level. The higher the value, the higher the severity. The default is 6."
+      apiMapping: connection_config.severityLevel
+      formStep: addConnection
+      isRequired: true
+    - id: expirySeconds
+      element: input
+      type: number
+      label: "Event Lifetime (s)"
+      placeholder: "80"
+      min: 1
+      max: 2147483647
+      step: 1
+      defaultValue: 300
+      helperText: "Specify the seconds to elapse before dismissing the event automatically. The default is 300."
+      apiMapping: connection_config.expirySeconds
+      formStep: addConnection
+      isRequired: true
+    - id: enableCPUHeavyWorkload
+      element: input
+      type: toggle
+      defaultToggled: false
+      label: "Enable workload with high CPU usage"
+      labelOff: "{{common.Off}}"
+      labelOn: "{{common.On}}"
+      apiMapping: connection_config.enableCPUHeavyWorkload
+      formStep: addConnection
+    - id: enableGatherMetrics
+      apiMapping: connection_config.enableGatherMetrics
+      element: toggleForm
+      defaultToggled: true
+      items:
+        - "{{common.Off}}"
+        - "{{common.On}}"
+      itemKeys: [true, false]
+      description: "Enables or disables metric connector template"
+      headerLabel: "Enable gathering of connector metrics"
+      isRequired: true
+      formStep: addConnection
+      form:
+        - id: false
+        - id: true
+          rows:
+            - id: metricName
+              element: input
+              type: text
+              label: "Metric name"
+              placeholder: "Usage%"
+              defaultValue: Usage%
+              helperText: "Specify the name of the generated metric data."
+              apiMapping: connection_config.metricName
+              formStep: addConnection
+              isRequired: true
+            - id: isLiveData
+              apiMapping: connection_config.isLiveData
+              element: form
+              type: dynamic
+              label: "{{common.mode}}"
+              items:
+                - "{{common.Historical}}"
+                - "{{common.Live}}"
+              itemKeys: [false, true]
+              isRequired: true
+              formStep: addConnection
+              form:
+                - id: false
+                  rows:
+                    - id: start
+                      element: input
+                      type: date
+                      label: "{{connector.common.form.start_date.label}}"
+                      placeholder: "{{connector.common.form.start_date.placeholder}}"
+                      formStep: addConnection
+                      header: "{{connector.common.form.historicalData.header}}"
+                      headerLabel: "{{connector.common.form.historicalData.headerDesc}}"
+                      headerLabelWarning: "{{connector.common.form.historicalData.headerWarning}}"
+                      isRequired: true
+                      apiMapping: connection_config.historicStartDate
+                    - id: end
+                      element: input
+                      type: date
+                      label: "{{connector.common.form.end_date.label}}"
+                      placeholder: "{{connector.common.form.end_date.placeholder}}"
+                      formStep: addConnection
+                      isRequired: true
+                      apiMapping: connection_config.historicEndDate
+                - id: true
+                  rows:
+    - id: enableTopologySampleGeneration
+      element: input
+      type: toggle
+      defaultToggled: false
+      label: "Enable generic topology sample generation"
+      labelOff: "{{common.Off}}"
+      labelOn: "{{common.On}}"
+      apiMapping: connection_config.enableTopologySampleGeneration
+      formStep: addConnection
+    - id: numCPUWorkloadThreads
+      element: input
+      type: number
+      label: "Number of workload threads"
+      placeholder: "1"
+      min: 1
+      max: 10
+      step: 1
+      defaultValue: 1
+      helperText: "Specify the number of threads to spawn when the cpu heavy workload is enabled."
+      apiMapping: connection_config.numCPUWorkloadThreads
+      formStep: addConnection
+      isRequired: false
+    - apiMapping: connection_config.deploymentType
+      element: input
+      formStep: addConnection
+      id: orchestration
+      itemKeys:
+      - local
+      - microedge
+      items:
+      - '{{connection_form.dynamic_item.local}}'
+      - '{{connection_form.dynamic_item.remote}}'
+      label: '{{connector.common.form.orchestration.label}}'
+      type: radio

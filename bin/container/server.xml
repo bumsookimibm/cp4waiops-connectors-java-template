@@ -1,0 +1,22 @@
+<server>
+  <!-- These are the production settings used in the docker container -->
+  <featureManager>
+    <feature>servlet-4.0</feature>
+    <feature>mpConfig-2.0</feature>
+    <feature>mpHealth-3.1</feature>
+    <feature>ssl-1.0</feature>
+    <feature>cdi-2.0</feature>
+  </featureManager>
+
+  <httpEndpoint id="defaultHttpEndpoint"
+                host="*"
+                httpsPort="9443"/>
+
+  <webApplication location="java-grpc-connector-template.war" contextRoot="/" />
+
+  <!-- info level logging for production -->
+  <logging consoleFormat="simple" consoleSource="message,trace" consoleLogLevel="info" traceFileName="stdout" traceFormat="BASIC" traceSpecification="com.ibm.aiops.connectors.*=info" />
+  <!-- trace logging for debugging, do NOT ship with this enabled -->
+  <!-- <logging consoleFormat="simple" consoleSource="message,trace" consoleLogLevel="info" traceFileName="stdout" traceFormat="BASIC" traceSpecification="com.ibm.aiops.connectors.*=all" /> -->
+
+</server>

@@ -1,0 +1,6 @@
+apiVersion: connectors.aiops.ibm.com/v1beta1
+kind: MicroEdgeConfiguration
+metadata:
+  name: java-grpc-connector-template
+spec:
+  image: java-grpc-connector-template

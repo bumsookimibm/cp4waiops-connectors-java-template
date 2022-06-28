@@ -1,0 +1,25 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: java-grpc-connector-template
+  labels:
+    app: java-grpc-connector-template
+spec:
+  endpoints:
+  - targetPort: metrics
+    path: /h/metrics
+    scheme: https
+    tlsConfig:
+      serverName: "$(SERVICE_NAME).$(SERVICE_NAMESPACE).svc"
+      ca:
+        configMap:
+          name: aiopsedge-openshift-ca-cert
+          key: service-ca.crt
+          optional: false
+    bearerTokenSecret: 
+      name: aiopsedge-health-check-key
+      key: apikey
+  selector:
+    matchLabels:
+      app: java-grpc-connector-template
+      instance: connector
