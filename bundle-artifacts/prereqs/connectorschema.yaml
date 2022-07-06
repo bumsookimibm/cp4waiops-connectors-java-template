@@ -24,7 +24,7 @@ spec:
         value: '{ "parameters":{ "provider":"unique-provider"}, "schedule": {}}'
       - name: neverupdate
         value: "true"
-  documentation: https://github.ibm.com/quicksilver/cp4waiops-grpc-templates/blob/master/open-liberty/README.md
+  documentation: https://github.com/bumsookimibm/cp4waiops-connectors-java-template/blob/main/README.md
   permissions:
     channels:
       - name: cp4waiops-cartridge.analyticsorchestrator.metrics.itsm.raw
